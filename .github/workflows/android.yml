@@ -40,6 +40,7 @@ jobs:
       - name: Install SDK packages (runner has preinstalled SDK + cmdline-tools)
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973"
           yes | sdkmanager --licenses > /dev/null
           echo "sdk.dir=$ANDROID_HOME" > local.properties
