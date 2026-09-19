@@ -20,7 +20,7 @@ class YtDlpBridge(private val ffmpegDir: String, private val jsRuntimePath: Stri
   }
   private fun mapError(e: Exception): Exception {
     val msg = e.message ?: "Unable to retrieve this video's formats."
-    return if ("site_changed" in msg || "extract" in msg.lower())
+    return if ("site_changed" in msg || "extract" in msg.lowercase())
       Exception("This URL could not be processed by the currently installed downloader " +
         "components.\nCheck for a downloader component update in Settings \u2192 Updates.\n\n$msg")
     else Exception("Unable to retrieve this video's formats.\n\n$msg")

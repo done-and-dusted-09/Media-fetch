@@ -3,8 +3,11 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.chaquo.python.Python
 /** Points yt-dlp at the bundled FFmpeg (FFmpegKit native lib, no system PATH use). */
 object FfmpegManager {
-  fun ffmpegDir(): String = com.arthenica.ffmpegkit.FFmpegKitConfig.getSafParameter(null) ?: ""
-  fun version(): String = try { FFmpegKit.getVersion() } catch (e: Exception) { "unknown: $e" }
+  // FFmpegKit runs FFmpeg in-process via JNI and exports no standalone binary
+  // path, so there is no ffmpeg_location to hand to yt-dlp. Version/health is
+  // read from FFmpegKitConfig; in-process merge wiring is tracked as follow-up.
+  fun ffmpegDir(): String = ""
+  fun version(): String = try { com.arthenica.ffmpegkit.FFmpegKitConfig.getVersion() } catch (e: Exception) { "unknown: $e" }
 }
 /** Bundled QuickJS binary (NDK-built qjs in jniLibs). yt-dlp --js-runtimes quickjs:<path>. */
 object JsRuntimeManager {
