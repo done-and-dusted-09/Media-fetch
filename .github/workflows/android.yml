@@ -32,16 +32,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
-      - uses: android-actions/setup-android@v3
-      - name: Install SDK packages
+      - name: Install SDK packages (runner has preinstalled SDK + cmdline-tools)
         run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
           sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973"
-          sdkmanager --licenses > /dev/null <<< "y"
+          yes | sdkmanager --licenses > /dev/null
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "ndk.dir=$ANDROID_HOME/ndk/27.0.12077973" >> local.properties
       - uses: gradle/actions/setup-gradle@v3
