@@ -34,8 +34,6 @@ object UpdateChecker {
 object PackageInstaller {
   fun install(pkg: File, expectedSha256: String, destDir: File,
       validate: (File) -> Boolean): Pair<Boolean,String> {
-    if (ManifestVerifier.sha256(pkg) != expectedSha256.lowercase().replace("^[0-9a-f]{64}$".toRegex(), expectedSha256))
-      return false to "Update could not be verified. The existing installation has not been changed."
     if (ManifestVerifier.sha256(pkg).lowercase() != expectedSha256.lowercase())
       return false to "Update could not be verified. The existing installation has not been changed."
     val backup = File(destDir, ".backup-${System.currentTimeMillis()}")

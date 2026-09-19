@@ -1,0 +1,89 @@
+name: Android CI + Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test deps
+        run: pip install pytest yt-dlp==2026.8.19
+      - name: Python unit tests (mocked, no network)
+        run: python -m pytest tests/python -q
+
+  build-apk:
+    needs: verify-python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - uses: android-actions/setup-android@v3
+      - name: Install SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973"
+          sdkmanager --licenses > /dev/null <<< "y"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "ndk.dir=$ANDROID_HOME/ndk/27.0.12077973" >> local.properties
+      - uses: gradle/actions/setup-gradle@v3
+      - name: JVM unit tests
+        run: gradle :app:testDebugUnitTest --stacktrace
+      - name: Build APKs (debug signed + release unsigned)
+        run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
+      - name: Rename + checksum
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk dist/MediaFetch-v${{ github.ref_name }}-debug.apk 2>/dev/null || cp app/build/outputs/apk/debug/app-debug.apk dist/MediaFetch-debug.apk
+          cp app/build/outputs/apk/release/app-release-unsigned.apk dist/MediaFetch-release-unsigned.apk
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt)
+          ls -lh dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: dist/
+
+  github-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: dist/
+      - name: Publish GitHub Release with APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          body: |
+            MediaFetch ${{ github.ref_name }} — self-contained yt-dlp downloader for Android.
+
+            Install: use the `-debug.apk` (signed with debug key, installable for testing).
+            The `-release-unsigned.apk` needs signing with your keystore before Play publishing.
+
+            Pinned: yt-dlp 2026.8.19 ([default] incl. yt-dlp-ejs), FFmpeg 8.1 (ffmpegkit-maintained full 8.1.7),
+            Chaquopy 16.x (CPython 3.11 in-APK), QuickJS wiring via `--js-runtimes quickjs:<bundled-path>`.
+
+            Known limitation: NDK-built `qjs` binary is not yet in `jniLibs/` (see README step 2);
+            health screen reports JS-runtime status honestly and YouTube EJS challenge-solving needs it.
+            No runtime pip/dependency downloads; updates only via Settings → Check for Updates (HTTPS + SHA-256).

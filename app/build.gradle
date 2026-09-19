@@ -11,7 +11,7 @@ python {
   // Bundled interpreter + pinned packages. Everything ships INSIDE the APK:
   // no pip / downloads at runtime. yt-dlp[default] pulls yt-dlp-ejs (bundled
   // challenge-solver scripts) so YouTube EJS never needs remote components.
-  buildPython("C:/Python311/python.exe")  // build-machine interpreter for pip install
+  buildPython("python3")  // build-machine interpreter for pip install (portable: Linux CI + Windows + macOS)
   pip { install("yt-dlp[default]==2026.8.19") }
 }
 dependencies {
