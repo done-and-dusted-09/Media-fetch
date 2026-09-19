@@ -1,0 +1,1 @@
+{"app":"1.0.0","ytdlp":"2026.8.19","ytdlp_ejs":"bundled-via-default-extra","ffmpeg":"8.1 (ffmpegkit-maintained full 8.1.7, LGPL)","ffprobe":"8.1 (via FFprobeKit)","js_runtime":"quickjs (bundled NDK binary, yt-dlp --js-runtimes quickjs:<path>)","python":"Chaquopy 16.x (CPython 3.11 bundled in APK)","minSdk":24,"targetSdk":35,"abis":["arm64-v8a","x86_64"]}
