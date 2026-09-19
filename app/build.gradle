@@ -26,4 +26,6 @@ dependencies {
   // Bundled FFmpeg/FFprobe (maintained fork of FFmpegKit: SDK 35, 16KB pages, LGPL):
   implementation 'dev.ffmpegkit-maintained:ffmpeg-kit-full:8.1.7'
   testImplementation 'junit:junit:4.13.2'
+  // Real org.json for JVM unit tests (android.jar only contains stubs that throw).
+  testImplementation 'org.json:json:20240303'
 }
