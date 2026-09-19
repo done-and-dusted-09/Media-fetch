@@ -7,12 +7,15 @@ android {
   buildTypes { release { minifyEnabled false } }
   compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
   kotlinOptions { jvmTarget = '17' } }
-python {
-  // Bundled interpreter + pinned packages. Everything ships INSIDE the APK:
-  // no pip / downloads at runtime. yt-dlp[default] pulls yt-dlp-ejs (bundled
-  // challenge-solver scripts) so YouTube EJS never needs remote components.
-  buildPython 'python3'  // build-machine interpreter for pip install (portable: Linux CI + Windows + macOS)
-  pip { install 'yt-dlp[default]==2026.8.19' }
+chaquopy {
+  defaultConfig {
+    version = "3.11"
+    // Bundled interpreter + pinned packages. Everything ships INSIDE the APK:
+    // no pip / downloads at runtime. yt-dlp[default] pulls yt-dlp-ejs (bundled
+    // challenge-solver scripts) so YouTube EJS never needs remote components.
+    buildPython "python3"  // build-machine interpreter for pip install (portable: Linux CI + Windows + macOS)
+    pip { install "yt-dlp[default]==2026.8.19" }
+  }
 }
 dependencies {
   implementation 'androidx.core:core-ktx:1.13.1'
